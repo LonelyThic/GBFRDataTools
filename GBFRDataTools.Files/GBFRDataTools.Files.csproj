@@ -26,6 +26,7 @@
     <PackageReference Include="BCnEncoder.Net.ImageSharp" Version="1.1.2" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.7" />
     <PackageReference Include="Syroot.BinaryData" Version="5.2.2" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.7" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 

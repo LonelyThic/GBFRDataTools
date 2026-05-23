@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Text;
+using System.Xml;
 
 using Syroot.BinaryData;
 
@@ -18,8 +19,10 @@ public class XmlBin
     /// <param name="stream"></param>
     /// <returns></returns>
     /// <exception cref="InvalidDataException"></exception>
-    public static XmlDocument Read(Stream stream)
+    public static XmlDocument Read(Stream stream, Encoding? encoding = default)
     {
+        encoding ??= Encoding.UTF8;
+
         XmlDocument doc = new XmlDocument();
 
         using var bs = new BinaryStream(stream, ByteConverter.Big);
@@ -64,13 +67,13 @@ public class XmlBin
             if (data.KeyOffset != BINXML_ATTR_INVALID)
             {
                 bs.Position = actualDataOffset + data.KeyOffset;
-                data.Key = bs.ReadString(StringCoding.ZeroTerminated);
+                data.Key = bs.ReadString(StringCoding.ZeroTerminated, encoding: encoding);
             }
 
             if (data.ValueOffset != BINXML_ATTR_INVALID)
             {
                 bs.Position = actualDataOffset + data.ValueOffset;
-                data.Value = bs.ReadString(StringCoding.ZeroTerminated);
+                data.Value = bs.ReadString(StringCoding.ZeroTerminated, encoding: encoding);
             }
             datas.Add(data);
         }

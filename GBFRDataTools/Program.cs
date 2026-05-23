@@ -46,7 +46,8 @@ internal class Program
         if (args.Length == 1 && File.Exists(args[0]))
         {
             string ext = Path.GetExtension(args[0]);
-            if (IsUiBinaryFile(ext) || ext.EndsWith("yaml") || ext.EndsWith("wtb") || ext.EndsWith("texture") || ext.EndsWith("bxm") || ext.EndsWith("xml"))
+            if (IsUiBinaryFile(ext) || ext.EndsWith("yaml") || ext.EndsWith("wtb") || ext.EndsWith("texture") || ext.EndsWith("bxm") || ext.EndsWith("xml") ||
+                ext.EndsWith("wtb") || ext.EndsWith("texture"))
             {
                 BulkConvert(new BConvertVerbs() { Input = args[0] });
                 return;
@@ -58,7 +59,7 @@ internal class Program
             foreach (var file in Directory.GetFiles(args[0], "*", SearchOption.AllDirectories))
             {
                 string ext = Path.GetExtension(file);
-                if (ext.EndsWith("texb"))
+                if (ext.EndsWith("texb") || ext.EndsWith("wtb") || ext.EndsWith("texture"))
                 {
                     BulkConvert(new BConvertVerbs() { Input = file });
                 }
@@ -719,11 +720,11 @@ internal class Program
         if (Directory.Exists(verbs.Input))
         {
             foreach (var file in Directory.GetFiles(verbs.Input, "*", SearchOption.AllDirectories))
-                ConvertBxmToXml(file, verbs.Output);
+                ConvertBxmToXml(file, verbs.Output, verbs.ShiftJIS);
         }
         else if (File.Exists(verbs.Input))
         {
-            ConvertBxmToXml(verbs.Input, verbs.Output);
+            ConvertBxmToXml(verbs.Input, verbs.Output, verbs.ShiftJIS);
         }
         else
         {
@@ -798,7 +799,7 @@ internal class Program
         }
     }
 
-    private static void ConvertBxmToXml(string input, string output)
+    private static void ConvertBxmToXml(string input, string output, bool useShiftJis = false)
     {
         string ext = Path.GetExtension(input);
         if (ext != ".bxm")
@@ -813,7 +814,16 @@ internal class Program
             if (string.IsNullOrEmpty(output))
                 output = Path.ChangeExtension(input, ".xml");
 
-            var doc = XmlBin.Read(fs);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            var encoding = Encoding.UTF8;
+            if (useShiftJis)
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                encoding = Encoding.GetEncoding("Shift-JIS");
+            }
+
+            var doc = XmlBin.Read(fs, encoding);
             doc.Save(output);
 
             Console.WriteLine($"Converted to {output}.");
@@ -1132,6 +1142,9 @@ public class BxmToXmlVerbs
 
     [Option('o', "output", HelpText = "Output folder for .xml files.")]
     public string Output { get; set; }
+
+    [Option("shift-jis", HelpText = "Whether to use Shift-JIS rather than UTF-8")]
+    public bool ShiftJIS { get; set; }
 }
 
 [Verb("xml-to-bxm", HelpText = "Converts .xml files to .bxm.")]
