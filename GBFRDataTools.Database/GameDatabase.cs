@@ -44,7 +44,10 @@ public class GameDatabase
         {
             string? hdr = TableMappingReader.GetHeadersFilePath(Path.GetFileNameWithoutExtension(tableFile));
             if (string.IsNullOrEmpty(hdr))
+            {
+                Console.WriteLine($"WARNING: Skipping {Path.GetFileNameWithoutExtension(tableFile)}, no layout exists");
                 continue;
+            }
 
             DataTable dt = new DataTable();
             dt.Read(tableFile, version, idDatabase);
