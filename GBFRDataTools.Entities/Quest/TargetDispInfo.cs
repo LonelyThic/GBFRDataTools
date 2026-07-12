@@ -13,6 +13,9 @@ public class TargetDispInfo
     public string TextHash { get; set; }
     public int Type { get; set; }
 
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public int Param { get; set; }
+
     public void Read(ref MessagePackReader reader)
     {
         int mapCount = reader.ReadMapHeader();
@@ -25,7 +28,8 @@ public class TargetDispInfo
                     TextHash = reader.ReadString(); break;
                 case "type_":
                     Type = int.Parse(reader.ReadString()); break;
-
+                case "param_":
+                    Param = int.Parse(reader.ReadString()); break;
                 default:
                     throw new NotImplementedException($"Property '{key}' not supported for MultiInfo");
             }

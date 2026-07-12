@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,10 +18,20 @@ public class MultiInfo
     public int MultiQuestType { get; set; }
     public string Location { get; set; }
 
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public bool IsEnableEnemyIdsSort { get; set; }
+
     // enemyIds_[{0}], enemyNum_[{0}], overwriteStatusAndReward_[{}]
     public List<int> EnemyIds { get; set; } = [];
     public List<int> EnemyNum { get; set; } = [];
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public List<int> EnemyRound { get; set; } = [];
+
     public List<uint> OverwriteStatusAndReward { get; set; } = [];
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public List<uint> OverwriteDropReward { get; set; } = [];
 
     public float Min { get; set; }
     public float Max { get; set; }
@@ -30,6 +41,12 @@ public class MultiInfo
     public TargetDispInfo TargetDispInfo { get; set; }
     public bool IsUltimateParameterUse { get; set; }
     public bool IsBossRush { get; set; }
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public bool IsSummonProhibited { get; set; }
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public bool IsIgnoreDropEnemyReward { get; set; }
 
     public void Read(ref MessagePackReader reader)
     {
@@ -51,6 +68,8 @@ public class MultiInfo
                     MultiQuestType = int.Parse(reader.ReadString()); break;
                 case "location_":
                     Location = reader.ReadString(); break;
+                case "isEnableEnemyIdsSort_":
+                    IsEnableEnemyIdsSort = bool.Parse(reader.ReadString()); break;
                 case "min_":
                     Min = float.Parse(reader.ReadString()); break;
                 case "max_":
@@ -69,14 +88,22 @@ public class MultiInfo
                     IsUltimateParameterUse = bool.Parse(reader.ReadString()); break;
                 case "isBossRush_":
                     IsBossRush = bool.Parse(reader.ReadString()); break;
+                case "isSummonProhibited_":
+                    IsSummonProhibited = bool.Parse(reader.ReadString()); break;
+                case "isIgnoreDropEnemyReward_":
+                    IsIgnoreDropEnemyReward = bool.Parse(reader.ReadString()); break;
 
                 default:
                     if (key.StartsWith("enemyIds_"))
                         EnemyIds.Add(int.Parse(reader.ReadString()));
                     else if (key.StartsWith("enemyNum_"))
                         EnemyNum.Add(int.Parse(reader.ReadString()));
+                    else if (key.StartsWith("enemyRound_"))
+                        EnemyRound.Add(int.Parse(reader.ReadString()));
                     else if (key.StartsWith("overwriteStatusAndReward_"))
                         OverwriteStatusAndReward.Add(uint.Parse(reader.ReadString()));
+                    else if (key.StartsWith("overwriteDropReward_"))
+                        OverwriteDropReward.Add(uint.Parse(reader.ReadString()));
                     else
                         throw new NotImplementedException($"Property '{key}' not supported for MultiInfo");
                     break;

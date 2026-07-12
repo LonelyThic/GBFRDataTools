@@ -24,6 +24,18 @@ public class TargetInfo
     public int IdIndex { get; set; }
     public uint UdsId { get; set; }
 
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public uint PremiseUdsId { get; set; }
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public List<uint> ExtraIds { get; set; } = [];
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public bool ShouldKeepUdsActive { get; set; }
+
+    [GameSupport(GameVersion.EndlessRagnarok)]
+    public bool ExtraFlag { get; set; }
+
     public void Read(ref MessagePackReader reader)
     {
         int mapCount = reader.ReadMapHeader();
@@ -50,9 +62,19 @@ public class TargetInfo
                     IdIndex = int.Parse(reader.ReadString()); break;
                 case "udsId_":
                     UdsId = uint.Parse(reader.ReadString()); break;
+                case "premiseUdsId_":
+                    PremiseUdsId = uint.Parse(reader.ReadString()); break;
+                case "shouldKeepUdsActive_ ": // Yes, there is a space..
+                    ShouldKeepUdsActive = bool.Parse(reader.ReadString()); break;
+                case "extraFlag_ ":
+                    ExtraFlag = bool.Parse(reader.ReadString()); break;
 
                 default:
-                    throw new NotImplementedException($"Property '{key}' not supported for TargetInfo");
+                    if (key.StartsWith("extraIds_"))
+                        ExtraIds.Add(uint.Parse(reader.ReadString()));
+                    else
+                        throw new NotImplementedException($"Property '{key}' not supported for TargetInfo");
+                    break;
 
             }
         }
