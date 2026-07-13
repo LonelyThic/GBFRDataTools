@@ -53,9 +53,26 @@ public class SQLiteExporter : IDisposable
         com.CommandText = "PRAGMA journal_mode = MEMORY;";
         com.ExecuteNonQuery();
 
+        List<string> errorTables = [];
         foreach (var table in _database.Tables) 
         {
-            ExportTableToSQLite(table.Key, table.Value.Columns, table.Value.Rows);
+            try
+            {
+                ExportTableToSQLite(table.Key, table.Value.Columns, table.Value.Rows);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR: Failed to export {table.Key} - {ex}");
+                errorTables.Add(table.Key);
+            }
+        }
+
+        if (errorTables.Count > 0)
+        {
+            Console.WriteLine("Not all tables were exported (incorrect layout or layout not updated for game version provided).");
+            Console.WriteLine($"Errored tables ({errorTables.Count}):");
+            foreach (var errorTable in errorTables)
+                Console.WriteLine($"- {errorTable}");
         }
 
         _con.Close();
