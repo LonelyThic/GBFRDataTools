@@ -41,11 +41,27 @@ public class ArchiveBruteforcer
         BruteforceMiscTextures();
 
         BruteforceQuestBaseInfo();
-        //.BruteforceEffectPrimitive();
+        //BruteforceEffectPrimitive();
         //BruteforceFromStringList();
         //BruteforceFileReferencesFromLayout();
         //BruteforceFileReferencesFromFSM();
-        
+
+        var r2ModsPath = Environment.GetEnvironmentVariable("RELOADEDIIMODS");
+        if (!string.IsNullOrEmpty(r2ModsPath))
+        {
+            // strings2.exe against extracted folder (takes a while)
+            string strings2File = Path.Combine(r2ModsPath, "gbfrelink.utility.filenamelogger", "logs", "filelist.txt");
+            if (File.Exists(strings2File))
+                BruteforceFromStringList(strings2File);
+        }
+
+        string extractedPath = @"<path to extracted folder>";
+        if (File.Exists(extractedPath))
+        {
+            BruteforceFileReferencesFromLayout(extractedPath);
+            BruteforceFileReferencesFromFSM(extractedPath);
+        }
+
         BruteforceEffectTextureFiles();
         BruteforcePhaseEffect();
         BruteforceLayout2();
@@ -53,13 +69,10 @@ public class ArchiveBruteforcer
         //ListFiles();
         //BruteforceSeqBxm(); // Slow!
 
-        
         for (int i = 0; i < 0x1000; i++)
         {
             _archive.RegisterFileIfValid($"system/npc/{i:X3}_npcconfig.msg");
         }
-        
-
 
         foreach (var t in type)
         {
@@ -463,7 +476,6 @@ public class ArchiveBruteforcer
                     _archive.RegisterFileIfValid($"ui/layouts/common/image_equip_s/noatlastextures/cmn_imgequ_s_{type}{i:X4}_{j:D2}_glow.wtb");
                 }
 
-                /*
                 for (int j = 0; j < 10; j++)
                 {
                     _archive.RegisterFileIfValid($"ui/layouts/common/chara_voice/noatlastextures/cmn_chrvo_{type}{i:X4}_{j:D2}.tex.texb");
@@ -472,6 +484,7 @@ public class ArchiveBruteforcer
                     _archive.RegisterFileIfValid($"ui/layouts/common/image_bookem/noatlastextures/cmn_imgbook_{type}{i:X4}_{j:D2}.wtb");
                     _archive.RegisterFileIfValid($"ui/movie/ab_{type}{i:X4}_{j:D2}.bk2");
                     _archive.RegisterFileIfValid($"ui/layouts/common/image_chrcolor/noatlastextures/cmn_imgcol_{type}{i:X4}_c{j:D2}.wtb");
+                    _archive.RegisterFileIfValid($"ui/layouts/common/image_chrcolor/noatlastextures/cmn_image_sboard_02_{type}{i:X4}_{j:D2}.wtb");
 
                 }
 
@@ -484,7 +497,6 @@ public class ArchiveBruteforcer
                 _archive.RegisterFileIfValid($"ui/layouts/common/image_equip_s/noatlastextures/cmn_imgequ_{type}{i:X4}.wtb");
                 _archive.RegisterFileIfValid($"ui/layouts/common/image_equip_s/noatlastextures/cmn_imgequ_s_{type}{i:X4}.wtb");
                 _archive.RegisterFileIfValid($"ui/layouts/pause/limitbonus/noatlastextures/ps_lb_stree_{type}{i:X4}.wtb");
-                */
             }
         }
     }
@@ -561,20 +573,23 @@ public class ArchiveBruteforcer
 
     }
 
-    public void BruteforceFromStringList()
+    public void BruteforceFromStringList(string strings2File)
     {
         // Requires file generated with the following command (can take a while, 1gb)
         // strings2 -r "extracted/*" > strings.txt
 
-        using var sr = new StreamReader(@"D:\Games\SteamLibrary\steamapps\common\Granblue Fantasy Relink Endless Ragnarok Beta Test\strings.txt");
+        // sr.Position = 299507712
+        using var sr = new StreamReader(strings2File);
         while (!sr.EndOfStream)
         {
             string line = sr.ReadLine();
+
+            _archive.RegisterFileIfValid(line);
+            continue;
+
             for (int i = 0; i < line.Length; i++)
             {
                 string sub = line.Substring(i);
-                
-                _archive.RegisterFileIfValid(sub);
                 _archive.RegisterFileIfValid("ui/" + sub + ".view.viewb");
                 _archive.RegisterFileIfValid("ui/" + sub + ".tex.texb");
                 _archive.RegisterFileIfValid("ui/" + sub + ".list.listb");
@@ -634,10 +649,10 @@ public class ArchiveBruteforcer
         }
     }
 
-    public void BruteforceFileReferencesFromLayout()
+    public void BruteforceFileReferencesFromLayout(string extractedPath)
     {
         // Requires files extracted beforehand
-        foreach (var file in Directory.GetFiles(@"D:\Games\SteamLibrary\steamapps\common\Granblue Fantasy Relink Endless Ragnarok Beta Test\extracted\layout", "*.msg", SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(Path.Combine(extractedPath, "layout"), "*.msg", SearchOption.AllDirectories))
         {
             try
             {
@@ -653,7 +668,7 @@ public class ArchiveBruteforcer
             }
         }
 
-        foreach (var file in Directory.GetFiles(@"D:\Games\SteamLibrary\steamapps\common\Granblue Fantasy Relink Endless Ragnarok Beta Test\extracted\.unmapped", "*.msg", SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(Path.Combine(extractedPath, ".unmapped"), "*.msg", SearchOption.AllDirectories))
         {
             try
             {
@@ -736,10 +751,10 @@ public class ArchiveBruteforcer
         }
     }
 
-    public void BruteforceFileReferencesFromFSM()
+    public void BruteforceFileReferencesFromFSM(string extractedPath)
     {
         // Requires files extracted beforehand
-        foreach (var file in Directory.GetFiles(@"D:\Games\SteamLibrary\steamapps\common\Granblue Fantasy Relink Endless Ragnarok Beta Test\extracted\system\fsm", "*.msg", SearchOption.AllDirectories))
+        foreach (var file in Directory.GetFiles(Path.Combine(extractedPath, "system", "fsm"), "*.msg", SearchOption.AllDirectories))
         {
             try
             {

@@ -88,12 +88,51 @@ public class DataArchive : IDisposable
         }
 
 #if DEBUG
-        /*
-        Console.WriteLine("Bruteforcing a few files..");
-        var brute = new ArchiveBruteforcer(this);
-        brute.Bruteforce();
+        /* File logger
+        var r2ModsPath = Environment.GetEnvironmentVariable("RELOADEDIIMODS");
+        if (!string.IsNullOrWhiteSpace(r2ModsPath))
+        {
+            string fileLoggerFileListPath = Path.Combine(r2ModsPath, "gbfrelink.utility.filenamelogger", "logs", "filelist.txt");
+            if (File.Exists(fileLoggerFileListPath))
+            {
+                using var reader = new StreamReader(fileLoggerFileListPath);
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine()?.Trim();
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith("//"))
+                        continue;
+
+                    string[] spl = line.Split('|');
+                    RegisterFileIfValid(spl[0]);
+                    if (spl.Length > 1)
+                        RegisterFileIfValid(spl[1]);
+                }
+            }
+        }
         */
+
+        /* Externals
+        string dataFolder = "<path to game's data folder>";
+        if (Directory.Exists(dataFolder))
+        {
+            foreach (var file in Directory.GetFiles(dataFolder, "*.*", SearchOption.AllDirectories))
+            {
+                string rel = Path.GetRelativePath(dataFolder, file);
+                RegisterFileIfValid(rel);
+            }
+        }
+        */
+
+
+        Console.WriteLine("Try bruteforce? [Y/N]");
+        if (Console.ReadKey().Key == ConsoleKey.Y)
+        {
+            Console.WriteLine("Bruteforcing a few files..");
+            var brute = new ArchiveBruteforcer(this);
+            brute.Bruteforce();
+        }
 #endif
+        
 
         Console.WriteLine("Archive loaded.");
         Console.WriteLine($"- Code Name: {Index.Codename}");
