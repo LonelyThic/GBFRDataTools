@@ -11,10 +11,10 @@ using SharpGLTF.Materials;
 using FlatSharp;
 using Syroot.BinaryData;
 
-using GraniteTextureReader.TileSet;
+using GraniteLib.TileSet;
+using GraniteLib;
 
 using GBFRDataTools.FlatBuffers;
-using GraniteTextureReader;
 
 namespace GBFRDataTools.Models;
 
